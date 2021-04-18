@@ -7,6 +7,7 @@ from django.http import HttpResponse
 
 # Our Models
 from .models import Dog
+from .dog_class import dogs
 # from dog_class.py import Dog
 
 # Create your views here.
@@ -23,8 +24,10 @@ def about(request):
 
 # Define the 'about/' view
 def dogs_index(request):
-    dogs = Dog.objects.all()
+    # dogs = Dog.objects.all()
     context = { 'dogs': dogs } # context is used for future growth
     print('dogs dogs dogs dogs dogs dogs dogs dogs')
     print(dogs)
     return render(request, 'dogs/index.html', context)
+
+    
