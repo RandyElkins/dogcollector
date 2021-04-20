@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 import datetime
 year = datetime.datetime.now().year
 
@@ -18,8 +19,9 @@ def home(request):
 
 # Define the about view
 def about(request):
-  context = { 'year': year }
-  return render(request, 'about.html', context) # The 'render' function will look exclusively in the 'templates' folder for the templates
+#   context = { 'year': year }
+  return render(request, 'about.html') # The 'render' function will look exclusively in the 'templates' folder for the templates
+# return render(request, 'about.html', context)
 #   return HttpResponse('<h1>About the Dog Collector</h1>')
 
 # Define the 'about/' view
@@ -33,3 +35,17 @@ def dogs_index(request):
 def dogs_detail(request, dog_id):
     dog = Dog.objects.get(id=dog_id)
     return render(request, 'dogs/detail.html', { 'dog': dog })
+
+class DogCreate(CreateView):
+  model = Dog
+  fields = '__all__'
+#   fields = ['name', 'breed', 'description', 'age'] # This is the same as above
+
+class DogUpdate(UpdateView):
+  model = Dog
+  # Let's disallow the renaming of a dog by excluding the name field!
+  fields = ['breed', 'description', 'age']
+
+class DogDelete(DeleteView):
+  model = Dog
+  success_url = '/dogs/'
