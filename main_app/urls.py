@@ -14,6 +14,7 @@ urlpatterns = [
   path('dogs/<int:dog_id>/add_feeding/', views.add_feeding, name='add_feeding'),
   path('dogs/<int:dog_id>/remove_feeding/', views.remove_feeding, name='remove_feeding'),
   path('dogs/<int:dog_id>/add_photo/', views.add_photo, name='add_photo'),
+  path('dogs/<int:dog_id>/remove_photo/', views.remove_photo, name='remove_photo'),
   # associate a toy with a dog (M:M)
   path('dogs/<int:dog_id>/assoc_toy/<int:toy_id>/', views.assoc_toy, name='assoc_toy'),
   path('dogs/<int:dog_id>/unassoc_toy/<int:toy_id>/', views.unassoc_toy, name='unassoc_toy'),

@@ -24,7 +24,14 @@
     </div> <!--***END*** <div class="card"> -->
     <!-- Insert photo markup below this comment -->
     {% for photo in dog.photo_set.all %}
-      <img class="responsive-img card-panel" src="{{photo.url}}">
+      <!-- Button to unassociate/remove toy -->
+      <div class="card-action">
+        <!-- <form action="{% url 'remove_photo' dog.id %}" enctype="multipart/form-data" method="POST" class="card-panel"> -->
+          <img class="responsive-img card-panel" src="{{photo.url}}">
+          <!-- {% csrf_token %}
+          <button type="submit" class="btn brown lighten-1">Remove</button>
+        </form> -->
+      </div>
     {% empty %}
       <div class="card-panel teal-text center-align">No Photos Uploaded</div>
     {% endfor %}
@@ -90,6 +97,7 @@
             </span>
           </div> <!-- ***END*** <div class="card-content"> -->
 
+            <!-- Button to unassociate/remove toy -->
             <div class="card-action">
               <form action="{% url 'unassoc_toy' dog.id toy.id %}" method="post">
                 {% csrf_token %}

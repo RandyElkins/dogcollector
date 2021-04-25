@@ -162,6 +162,27 @@ def add_photo(request, dog_id):
             print('An error occurred uploading file to S3')
     return redirect('detail', dog_id=dog_id)
 
+def remove_photo(request, dog_id):
+    print('\033[30;206;48;2;0;255;255mInside remove_photo\033[0m')
+    print(f'dog_id = {dog_id}')
+    # photo-file will be the "name" attribute on the <input type="file">
+    photo_file = request.FILES.get('photo-file', None)
+    if photo_file:
+        s3 = boto3.client('s3')
+        # need a unique "key" for S3 / needs image file extension too
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        # just in case something goes wrong
+        try:
+            s3.upload_fileobj(photo_file, BUCKET, key)
+            # build the full url string
+            url = f"{S3_BASE_URL}{BUCKET}/{key}"
+            print(f'\033[30;206;48;2;0;255;255murl = {url}\033[0m')# we can assign to dog_id or dog (if you have a dog object)
+            photo = Photo(url=url, dog_id=dog_id)
+            photo.delete()
+        except:
+            print('An error occurred uploading file to S3')
+    return redirect('detail', dog_id=dog_id)
+
 def signup(request):
     error_message = ''
     if request.method == 'POST':
