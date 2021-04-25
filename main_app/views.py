@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+
 import datetime
 year = datetime.datetime.now().year
 
@@ -32,7 +35,7 @@ def about(request):
 
 # Define the 'dogs/' view
 def dogs_index(request):
-    dogs = Dog.objects.order_by('id')
+    dogs = Dog.objects.filter(user=request.user).order_by('id')
     context = { 'dogs': dogs } # context is used for future growth
     print('dogs dogs dogs dogs dogs dogs dogs dogs')
     print(dogs)
@@ -55,8 +58,22 @@ def dogs_detail(request, dog_id):
     }
     return render(request, 'dogs/detail.html', context)
 
-# add this new function below dogs_detail
+# add a meal for the dog
 def add_feeding(request, dog_id):
+    # create the ModelForm using the data in request.POST
+    form = FeedingForm(request.POST)
+    # validate the form
+    if form.is_valid():
+        # don't save the form to the db until it
+        # has the dog_id assigned
+        new_feeding = form.save(commit=False) # commit=False returns an in-memory model object so that we can assign the dog_id before actually saving to the database
+        new_feeding.dog_id = dog_id
+        new_feeding.save()
+    return redirect('detail', dog_id=dog_id) # Always be sure to redirect instead of render if data has been changed in the database
+
+# remove a meal for the dog
+def remove_feeding(request, dog_id):
+    print('\033[30;206;48;2;255;255;0mInside remove_feeding')
     # create the ModelForm using the data in request.POST
     form = FeedingForm(request.POST)
     # validate the form
@@ -70,8 +87,16 @@ def add_feeding(request, dog_id):
 
 class DogCreate(CreateView):
     model = Dog
-    fields = '__all__'
-    #   fields = ['name', 'breed', 'description', 'age'] # This is the same as above
+    # fields ='__all__'
+    fields = ['name', 'breed', 'description', 'age'] # This is the same as above
+
+    # This inherited method is called when a
+    # valid dog form is being submitted
+    def form_valid(self, form):
+        # Assign the logged in user (self.request.user)
+        form.instance.user = self.request.user  # form.instance is the dog
+        # Let the CreateView do its job as usual
+        return super().form_valid(form)
 
 class DogUpdate(UpdateView):
     model = Dog
@@ -113,6 +138,11 @@ def assoc_toy(request, dog_id, toy_id):
     Dog.objects.get(id=dog_id).toys.add(toy_id)
     return redirect('detail', dog_id=dog_id)
 
+def unassoc_toy(request, dog_id, toy_id):
+    # Note that you can pass a toy's id instead of the whole object
+    Dog.objects.get(id=dog_id).toys.remove(toy_id)
+    return redirect('detail', dog_id=dog_id)
+
 def add_photo(request, dog_id):
     # photo-file will be the "name" attribute on the <input type="file">
     photo_file = request.FILES.get('photo-file', None)
@@ -131,3 +161,22 @@ def add_photo(request, dog_id):
         except:
             print('An error occurred uploading file to S3')
     return redirect('detail', dog_id=dog_id)
+
+def signup(request):
+    error_message = ''
+    if request.method == 'POST':
+        # This is how to create a 'user' form object
+        # that includes the data from the browser
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            # This will add the user to the database
+            user = form.save()
+            # This is how we log a user in via code
+            login(request, user)
+            return redirect('dogs')
+        else:
+            error_message = 'Invalid sign up - try again'
+    # A bad POST or a GET request, so render signup.html with an empty form
+    form = UserCreationForm()
+    context = {'form': form, 'error_message': error_message}
+    return render(request, 'registration/signup.html', context)

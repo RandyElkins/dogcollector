@@ -57,12 +57,19 @@
     <table class="striped">
       <thead>
         <tr><th>Date</th><th>Meal</th></tr>
+        <!-- <tr><th>Date</th><th>Meal</th><th></th></tr> -->
       </thead>
       <tbody>
         {% for feeding in dog.feeding_set.all %}
           <tr>
             <td>{{feeding.date}}</td>
             <td>{{feeding.get_meal_display}}</td>
+            <!-- <td>
+              <form action="{% url 'remove_feeding' dog.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" class="btn brown lighten-1" value="Remove">
+              </form>
+            </td> -->
           </tr>
         {% endfor %}
       </tbody>
@@ -82,6 +89,14 @@
             A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
             </span>
           </div> <!-- ***END*** <div class="card-content"> -->
+
+            <div class="card-action">
+              <form action="{% url 'unassoc_toy' dog.id toy.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn brown lighten-1">Remove</button>
+              </form>
+            </div>
+  
         </div> <!-- ***END*** <div class="card"> -->
       {% endfor %}
     {% else %}
